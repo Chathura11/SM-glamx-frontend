@@ -156,12 +156,38 @@ const SalesPage = ({ authUser }) => {
             inputProps={{ min: 0 }}
           />
         </Grid>
+        <Grid item xs={3}>
+          <Select
+            fullWidth
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>Select Payment Method</MenuItem>
+            <MenuItem value="Cash">Cash</MenuItem>
+            <MenuItem value="Card">Card</MenuItem>
+            <MenuItem value="Online">Online</MenuItem>
+          </Select>
+        </Grid>
+        <Grid item xs={3}>
+          <Select
+            fullWidth
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>Select Status</MenuItem>
+            <MenuItem value="Completed">Completed</MenuItem>
+            <MenuItem value="Pending">Pending</MenuItem>
+            <MenuItem value="Free">Free</MenuItem>
+          </Select>
+        </Grid>
       </Grid>
 
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <Select
-            sx={{ width: '100%' }}
+            sx={{ width: '400px' }}
             value={selectedProduct?._id || ''}
             onChange={(e) => {
               const prod = products.find(p => p._id === e.target.value);
@@ -204,32 +230,7 @@ const SalesPage = ({ authUser }) => {
             inputProps={{ min: 1 }}
           />
         </Grid>
-        <Grid item xs={3}>
-          <Select
-            fullWidth
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="" disabled>Select Payment Method</MenuItem>
-            <MenuItem value="Cash">Cash</MenuItem>
-            <MenuItem value="Card">Card</MenuItem>
-            <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
-            <MenuItem value="Mobile Payment">Mobile Payment</MenuItem>
-          </Select>
-        </Grid>
-        <Grid item xs={3}>
-          <Select
-            fullWidth
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="" disabled>Select Status</MenuItem>
-            <MenuItem value="Completed">Completed</MenuItem>
-            <MenuItem value="Pending">Pending</MenuItem>
-          </Select>
-        </Grid>
+        
         <Grid item xs={2}>
           <Button fullWidth onClick={addItem} variant="contained" color="primary">
             Add Item
