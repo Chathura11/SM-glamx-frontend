@@ -21,6 +21,7 @@ const SIZES = ['S', 'M', 'L', 'XL'];
 const StockEntryForm = () => {
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [isLoading,setIsLoading] = useState(false);
 
   const [data, setData] = useState({
     supplier: '',
@@ -80,6 +81,7 @@ const StockEntryForm = () => {
     e.preventDefault();
     setServerError('');
     setResponse('');
+    setIsLoading(true);
 
     if (data.items.length === 0) {
       setServerError('Add at least one item.');
@@ -95,8 +97,10 @@ const StockEntryForm = () => {
         location: '',
         items: []
       });
+      setIsLoading(false);
     } catch (error) {
       setServerError(error.response?.data?.data || 'Server Error');
+      setIsLoading(false);
     }
   };
 
@@ -205,7 +209,7 @@ const StockEntryForm = () => {
           )}
 
           <Box sx={{ textAlign: 'end' }}>
-            <Button type="submit" variant="contained" onClick={handleSubmit}>
+            <Button type="submit" variant="contained" onClick={handleSubmit} disabled={isLoading}>
               Save Stock Entry
             </Button>
           </Box>
