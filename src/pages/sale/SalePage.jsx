@@ -108,6 +108,7 @@ const SalesPage = ({ authUser }) => {
         userId,
         customerName,
         paymentMethod,
+        status,
         items,
         discount
       });
