@@ -5,18 +5,19 @@ import {
 } from '@mui/material';
 import axiosInstance from '../../api/api';
 
-const SalesPage = ({authUser}) => {
+const SalesPage = ({ authUser }) => {
   const [products, setProducts] = useState([]);
   const [inventory, setInventory] = useState({});
   const [orderedItems, setOrderedItems] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [customerName, setCustomerName] = useState('');
+  const [discount, setDiscount] = useState(0);
   const [userId] = useState(authUser);
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
 
-  // Fetch products and inventory
   useEffect(() => {
-    
     fetchData();
   }, []);
 
@@ -72,7 +73,7 @@ const SalesPage = ({authUser}) => {
       quantity,
       sellingPrice,
       costPrice,
-      profit: (sellingPrice - costPrice) * quantity
+      profit: (sellingPrice - costPrice) * quantity,
     };
 
     const newOrdered = [...orderedItems];
@@ -96,39 +97,66 @@ const SalesPage = ({authUser}) => {
       size: item.size,
       quantity: item.quantity,
       sellingPrice: item.sellingPrice,
-      costPrice: item.costPrice,
-      profit: item.profit
+      costPrice: item.costPrice
     }));
-
-    const totalAmount = orderedItems.reduce((sum, item) => sum + item.sellingPrice * item.quantity, 0);
-    const totalProfit = orderedItems.reduce((sum, item) => sum + item.profit, 0);
 
     try {
       await axiosInstance.post('/sales', {
-        user: userId,
-        customerName: 'Walk-in',
-        paymentMethod: 'Cash',
-        totalAmount,
-        totalProfit,
-        items
+        userId,
+        customerName,
+        paymentMethod,
+        items,
+        discount
       });
 
       alert("Sale completed!");
       fetchData();
-      setOrderedItems([]);
+      handleClear();
     } catch (err) {
       console.error(err);
       alert("Failed to complete sale.");
     }
   };
 
+  const handleClear = () => {
+    setOrderedItems([]);
+    setCustomerName('');
+    setDiscount(0);
+    setQuantity(1);
+    setSelectedProduct(null);
+    setSelectedSize('');
+  };
+
+  const subtotal = orderedItems.reduce((sum, item) => sum + item.sellingPrice * item.quantity, 0);
+  const totalPayable = subtotal - discount;
+
   return (
     <Paper sx={{ p: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={4}>
+          <TextField
+            fullWidth
+            label="Customer Name"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={2}>
+          <TextField
+            fullWidth
+            label="Discount (Rs.)"
+            type="number"
+            value={discount}
+            onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
+            inputProps={{ min: 0 }}
+          />
+        </Grid>
+      </Grid>
 
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <Select
-            sx={{width:'400px'}}
+            sx={{ width: '100%' }}
             value={selectedProduct?._id || ''}
             onChange={(e) => {
               const prod = products.find(p => p._id === e.target.value);
@@ -139,7 +167,9 @@ const SalesPage = ({authUser}) => {
           >
             <MenuItem value="" disabled>Select Product</MenuItem>
             {products.map(p => (
-              <MenuItem key={p._id} value={p._id}>{p.name+"|"+p.category.name +"|"+p.brand.name}</MenuItem>
+              <MenuItem key={p._id} value={p._id}>
+                {p.name + " | " + p.category.name + " | " + p.brand.name}
+              </MenuItem>
             ))}
           </Select>
         </Grid>
@@ -164,19 +194,33 @@ const SalesPage = ({authUser}) => {
             fullWidth
             type="number"
             value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value))}
+            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value)))}
             label="Quantity"
+            inputProps={{ min: 1 }}
           />
         </Grid>
-        <Grid item xs={2}>
-          <Button variant="contained" fullWidth onClick={addItem}>Add</Button>
+        <Grid item xs={3}>
+          <Select
+            fullWidth
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>Select Payment Method</MenuItem>
+            <MenuItem value="Cash">Cash</MenuItem>
+            <MenuItem value="Card">Card</MenuItem>
+            <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
+            <MenuItem value="Mobile Payment">Mobile Payment</MenuItem>
+          </Select>
         </Grid>
         <Grid item xs={2}>
-          <Button variant="outlined" fullWidth onClick={() => setOrderedItems([])}>Clear</Button>
+          <Button fullWidth onClick={addItem} variant="contained" color="primary">
+            Add Item
+          </Button>
         </Grid>
       </Grid>
 
-      <TableContainer sx={{ mt: 3 }}>
+      <TableContainer component={Paper} sx={{ mt: 3 }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -186,7 +230,6 @@ const SalesPage = ({authUser}) => {
               <TableCell>Selling Price</TableCell>
               <TableCell>Cost Price</TableCell>
               <TableCell>Profit</TableCell>
-              <TableCell>Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -198,20 +241,31 @@ const SalesPage = ({authUser}) => {
                 <TableCell>{item.sellingPrice}</TableCell>
                 <TableCell>{item.costPrice}</TableCell>
                 <TableCell>{item.profit.toFixed(2)}</TableCell>
-                <TableCell>{(item.sellingPrice * item.quantity).toFixed(2)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Typography variant="h6" sx={{ mt: 2 }}>
-        Total: Rs. {orderedItems.reduce((sum, item) => sum + item.sellingPrice * item.quantity, 0).toFixed(2)}
-      </Typography>
-
-      <Button variant="contained" color="success" sx={{ mt: 2 }} onClick={handleSell}>
-        Sell
-      </Button>
+      <Grid container justifyContent="flex-end" spacing={2} sx={{ mt: 2 }}>
+        <Grid item xs={4}>
+          <Typography variant="h6">Subtotal: Rs. {subtotal.toFixed(2)}</Typography>
+          <Typography variant="h6">Discount: Rs. {discount.toFixed(2)}</Typography>
+          <Typography variant="h5" sx={{ mt: 1 }}>Total Payable: Rs. {totalPayable.toFixed(2)}</Typography>
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={6}>
+              <Button fullWidth variant="contained" color="success" onClick={handleSell}>
+                Complete Sale
+              </Button>
+            </Grid>
+            <Grid item xs={6}>
+              <Button fullWidth variant="outlined" color="secondary" onClick={handleClear}>
+                Clear
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </Paper>
   );
 };
