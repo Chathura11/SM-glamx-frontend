@@ -17,6 +17,7 @@ import ProfileCard from '../user-profile/ProfileCard';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 
 const drawerWidth = 240;
 
@@ -125,6 +126,9 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
       }
       if(index ===4){
         navigate('/inventories')
+      }
+      if(index ===5){
+        navigate('/sell/sale-transactions')
       }
     }
 
@@ -240,7 +244,7 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
                 </DrawerHeader>
                 <Divider />
                   <List>
-                    {['Sell', 'Home', 'Categories', 'Brands', 'Inventory'].map((text, index) => (
+                    {['Sell', 'Home', 'Categories', 'Brands', 'Inventory','Sale Transactions'].map((text, index) => (
                       <ListItem key={text} disablePadding sx={{ display: 'block' }}>
                         <ListItemButton
                           sx={{
@@ -261,7 +265,9 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
                             : index === 1 ? <HomeOutlinedIcon /> 
                             : index === 2 ? <TableViewOutlinedIcon /> 
                             : index === 3 ? <StyleOutlinedIcon />
-                            : <Inventory2OutlinedIcon />}
+                            : index === 4 ?<Inventory2OutlinedIcon />
+                            :<PointOfSaleIcon />
+                          }
                           </ListItemIcon>
                           <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
                         </ListItemButton>

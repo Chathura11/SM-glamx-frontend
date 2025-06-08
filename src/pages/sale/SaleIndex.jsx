@@ -5,6 +5,7 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { Route, Routes } from 'react-router-dom';
 import SaleContent from './SaleContent';
 import SalesPage from './SalePage';
+import SalesTransactionPage from './SalesTransactionPage';
 
 const SaleIndex = ({isLoggedIn,authUser}) => {
 
@@ -19,6 +20,7 @@ const SaleIndex = ({isLoggedIn,authUser}) => {
                 <Routes>
                     {/* <Route path='/' element={<SaleContent authUser={authUser}/>}></Route> */}
                     <Route path='/' element={<SalesPage authUser={authUser}/>}></Route>
+                    <Route path='/sale-transactions' element={<SalesTransactionPage authUser={authUser}/>}></Route>
                 </Routes>
             }
     </Stack>
