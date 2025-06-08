@@ -10,17 +10,26 @@ import {
   Box,
   Divider,
   LinearProgress,
+  TextField,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 const SalesTransactionPage = () => {
   const [transactions, setTransactions] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   useEffect(() => {
     const loadTransactions = async () => {
       try {
         const response = await axiosInstance.get('/sales');
-        setTransactions(response.data.data);
+        const data = response.data.data;
+        setTransactions(data);
+        filterByDate(data, selectedDate);
       } catch (error) {
         console.error('Error fetching transactions:', error);
       } finally {
@@ -30,6 +39,19 @@ const SalesTransactionPage = () => {
 
     loadTransactions();
   }, []);
+
+  const filterByDate = (data, date) => {
+    const formatted = dayjs(date).format('YYYY-MM-DD');
+    const filteredData = data.filter((tx) =>
+      dayjs(tx.createdAt).format('YYYY-MM-DD') === formatted
+    );
+    setFiltered(filteredData);
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    filterByDate(transactions, date);
+  };
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleString();
 
@@ -46,19 +68,28 @@ const SalesTransactionPage = () => {
         Sales Transactions
       </Typography>
 
-      {loading && (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          label="Select Date"
+          value={selectedDate}
+          onChange={handleDateChange}
+          renderInput={(params) => (
+            <TextField {...params} fullWidth sx={{ mb: 3, maxWidth: 300 }} />
+          )}
+        />
+      </LocalizationProvider>
+
+      {loading ? (
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <LinearProgress color="primary" />
         </Box>
-      )}
-
-      {transactions.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <Typography variant="body1" textAlign="center" mt={4}>
-          No transactions found.
+          No transactions found for selected date.
         </Typography>
       ) : (
         <Grid container direction="column" spacing={4}>
-          {transactions.map((tx) => (
+          {filtered.map((tx) => (
             <Grid
               container
               key={tx._id}
@@ -71,7 +102,6 @@ const SalesTransactionPage = () => {
                 boxShadow: '0 2px 6px rgb(0 0 0 / 0.1)',
               }}
             >
-              {/* Transaction details row */}
               <Grid container spacing={4} alignItems="center" sx={{ mb: 2 }}>
                 <Grid item xs={12} sm={6} md={4} lg={2.4}>
                   <Typography
@@ -182,7 +212,6 @@ const SalesTransactionPage = () => {
 
               <Divider />
 
-              {/* Items List */}
               <Box mt={2} width="100%">
                 <Typography variant="subtitle1" fontWeight={700} gutterBottom>
                   Items
@@ -191,7 +220,7 @@ const SalesTransactionPage = () => {
                   {tx.items.map((item) => (
                     <ListItem key={item._id} sx={{ pl: 0 }}>
                       <ListItemText
-                        primary={`${item.product?.name+" | "+item.product?.category?.name +" | "+ item.product?.brand?.name} (Size: ${item.size})`}
+                        primary={`${item.product?.name} | ${item.product?.category?.name} | ${item.product?.brand?.name} (Size: ${item.size})`}
                         secondary={`${item.quantity} pcs @ Rs. ${item.sellingPrice.toFixed(2)}`}
                       />
                     </ListItem>
