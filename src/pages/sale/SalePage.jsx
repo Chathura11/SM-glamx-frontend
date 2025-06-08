@@ -16,6 +16,8 @@ const SalesPage = ({ authUser }) => {
   const [discount, setDiscount] = useState(0);
   const [userId] = useState(authUser);
   const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [status, setStatus] = useState('Completed');
+  const [isLoading,setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -90,6 +92,7 @@ const SalesPage = ({ authUser }) => {
   };
 
   const handleSell = async () => {
+    setIsLoading(true);
     if (orderedItems.length === 0) return alert("No items to sell.");
 
     const items = orderedItems.map(item => ({
@@ -112,9 +115,11 @@ const SalesPage = ({ authUser }) => {
       alert("Sale completed!");
       fetchData();
       handleClear();
+      setIsLoading(false);
     } catch (err) {
       console.error(err);
       alert("Failed to complete sale.");
+      setIsLoading(false);
     }
   };
 
@@ -213,6 +218,18 @@ const SalesPage = ({ authUser }) => {
             <MenuItem value="Mobile Payment">Mobile Payment</MenuItem>
           </Select>
         </Grid>
+        <Grid item xs={3}>
+          <Select
+            fullWidth
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>Select Status</MenuItem>
+            <MenuItem value="Completed">Completed</MenuItem>
+            <MenuItem value="Pending">Pending</MenuItem>
+          </Select>
+        </Grid>
         <Grid item xs={2}>
           <Button fullWidth onClick={addItem} variant="contained" color="primary">
             Add Item
@@ -254,7 +271,7 @@ const SalesPage = ({ authUser }) => {
           <Typography variant="h5" sx={{ mt: 1 }}>Total Payable: Rs. {totalPayable.toFixed(2)}</Typography>
           <Grid container spacing={2} sx={{ mt: 2 }}>
             <Grid item xs={6}>
-              <Button fullWidth variant="contained" color="success" onClick={handleSell}>
+              <Button fullWidth variant="contained" color="success" onClick={handleSell} disabled={isLoading}>
                 Complete Sale
               </Button>
             </Grid>
