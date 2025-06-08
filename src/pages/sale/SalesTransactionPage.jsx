@@ -191,7 +191,7 @@ const SalesTransactionPage = () => {
                   {tx.items.map((item) => (
                     <ListItem key={item._id} sx={{ pl: 0 }}>
                       <ListItemText
-                        primary={`${item.product?.name} (Size: ${item.size})`}
+                        primary={`${item.product?.name+" | "+item.product?.category?.name +" | "+ item.product?.brand?.name} (Size: ${item.size})`}
                         secondary={`${item.quantity} pcs @ Rs. ${item.sellingPrice.toFixed(2)}`}
                       />
                     </ListItem>
