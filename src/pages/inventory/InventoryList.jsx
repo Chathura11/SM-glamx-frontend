@@ -48,10 +48,6 @@ const InventoryList = () => {
 
   return (
     <Paper elevation={0} sx={{ padding: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Inventory List
-      </Typography>
-
       <TextField
         label="Filter by Product Name or Code"
         variant="outlined"
@@ -64,7 +60,7 @@ const InventoryList = () => {
 
       {loading && (
         <Box sx={{ textAlign: 'center' }}>
-          <LinearProgress color="secondary" />
+          <LinearProgress color="teal" />
         </Box>
       )}
 

@@ -14,6 +14,8 @@ import {
   LinearProgress,
   TextField,
   Button,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -25,41 +27,86 @@ const SalesTransactionPage = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [showPendingOnly, setShowPendingOnly] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-        const response = await axiosInstance.get('/sales');
-        const data = response.data.data;
-        setTransactions(data);
-        filterByDate(data, selectedDate);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadTransactions();
   }, []);
 
-  const filterByDate = (data, date) => {
+  const loadTransactions = async () => {
+    try {
+      const response = await axiosInstance.get('/sales');
+      const data = response.data.data;
+      setTransactions(data);
+      filterTransactions(data, selectedDate, showPendingOnly, showAll);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterTransactions = (data, date, pendingOnly = false, all = false) => {
     const formatted = dayjs(date).format('YYYY-MM-DD');
     const filteredData = data.filter((tx) =>
-      dayjs(tx.createdAt).format('YYYY-MM-DD') === formatted
+      (all || dayjs(tx.createdAt).format('YYYY-MM-DD') === formatted) &&
+      (!pendingOnly || tx.status.toLowerCase() === 'pending')
     );
     setFiltered(filteredData);
   };
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    filterByDate(transactions, date);
+    filterTransactions(transactions, date, showPendingOnly, showAll);
+  };
+
+  const handlePendingToggle = (event) => {
+    const pendingOnly = event.target.checked;
+    setShowPendingOnly(pendingOnly);
+    filterTransactions(transactions, selectedDate, pendingOnly, showAll);
+  };
+
+  const handleShowAllToggle = (event) => {
+    const all = event.target.checked;
+    setShowAll(all);
+    filterTransactions(transactions, selectedDate, showPendingOnly, all);
+  };
+
+  const handleReverseTransaction = async (transactionId) => {
+    const confirm = window.confirm('Are you sure you want to reverse this transaction?');
+    if (!confirm) return;
+
+    try {
+      await axiosInstance.put(`/sales/reverse/${transactionId}`);
+      alert('Transaction reversed successfully.');
+      await loadTransactions();
+    } catch (error) {
+      console.error('Error reversing transaction:', error);
+      alert('Error reversing transaction.');
+    }
+  };
+
+  const handleMarkAsCompleted = async (transactionId) => {
+    const confirm = window.confirm('Mark this transaction as completed?');
+    if (!confirm) return;
+
+    try {
+      await axiosInstance.put(`/sales/mark-completed/${transactionId}`);
+      alert('Transaction marked as completed successfully.');
+      await loadTransactions();
+    } catch (error) {
+      console.error('Error marking transaction as completed:', error);
+      alert('Failed to mark transaction as completed.');
+    }
   };
 
   const exportToExcel = () => {
+    const exportData = showAll ? transactions : filtered;
+  
     const excelData = [];
   
-    transactions.forEach(tx => {
+    exportData.forEach(tx => {
       tx.items.forEach(item => {
         excelData.push({
           Date: new Date(tx.createdAt).toLocaleString(),
@@ -74,7 +121,7 @@ const SalesTransactionPage = () => {
           Quantity: item.quantity,
           SellingPrice: item.sellingPrice,
           CostPrice: item.costPrice,
-          Profit: (item.sellingPrice - item.costPrice) * item.quantity
+          Profit: (item.sellingPrice - item.costPrice) * item.quantity,
         });
       });
     });
@@ -83,65 +130,89 @@ const SalesTransactionPage = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
   
+    const filename = showAll
+      ? `sales_transactions_all_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`
+      : `sales_transactions_${dayjs(selectedDate).format('YYYYMMDD')}.xlsx`;
+  
     const excelBuffer = XLSX.write(workbook, {
       bookType: 'xlsx',
-      type: 'array'
+      type: 'array',
     });
   
     const blob = new Blob([excelBuffer], {
-      type:
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
     });
   
-    saveAs(blob, `sales_transactions_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`);
+    saveAs(blob, filename);
   };
+  
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleString();
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography
-        variant="h4"
-        gutterBottom
-        fontWeight={700}
-        textAlign="center"
-        color="primary"
-        mb={4}
-      >
+      <Typography variant="h4" gutterBottom fontWeight={700} textAlign="center" color="primary" mb={4}>
         Sales Transactions
       </Typography>
-      <Grid container direction="row" justifySelf='end' spacing={4}>
+
+      <Grid container direction="row" spacing={2} alignItems="center">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             label="Select Date"
             value={selectedDate}
             onChange={handleDateChange}
+            disabled={showAll}
             renderInput={(params) => (
               <TextField {...params} fullWidth sx={{ mb: 3, maxWidth: 300 }} />
             )}
           />
         </LocalizationProvider>
 
-        <Box sx={{justifyItems:'end'}}>
-          <Button onClick={exportToExcel} style={{
-                backgroundColor: '#1976d2',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}>
-                Download All Transactions
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showPendingOnly}
+              onChange={handlePendingToggle}
+              color="primary"
+            />
+          }
+          label="Show only Pending Orders"
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showAll}
+              onChange={handleShowAllToggle}
+              color="primary"
+            />
+          }
+          label="Show All Transactions"
+        />
+
+        <Box>
+          <Button
+            onClick={exportToExcel}
+            style={{
+              backgroundColor: '#1976d2',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Download Excel
           </Button>
         </Box>
-      </Grid>      
+      </Grid>
+
       {loading ? (
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <LinearProgress color="primary" />
+          <LinearProgress color="teal" />
         </Box>
       ) : filtered.length === 0 ? (
         <Typography variant="body1" textAlign="center" mt={4}>
-          No transactions found for selected date.
+          No transactions found.
         </Typography>
       ) : (
         <Grid container direction="column" spacing={4}>
@@ -160,63 +231,31 @@ const SalesTransactionPage = () => {
             >
               <Grid container spacing={4} alignItems="center" sx={{ mb: 2 }}>
                 <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    Date
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    {formatDate(tx.createdAt)}
-                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>Date</Typography>
+                  <Typography variant="body2" fontWeight={600}>{formatDate(tx.createdAt)}</Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    Customer
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    {tx.customerName || 'Walk-in'}
-                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>Customer</Typography>
+                  <Typography variant="body2" fontWeight={600}>{tx.customerName || 'Walk-in'}</Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    Sold By
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    {tx.user?.name || 'Unknown'}
-                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>Sold By</Typography>
+                  <Typography variant="body2" fontWeight={600}>{tx.user?.name || 'Unknown'}</Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    Status
-                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>Status</Typography>
                   <Typography
                     variant="body2"
                     fontWeight={700}
                     color={
                       tx.status.toLowerCase() === 'completed'
                         ? 'success.main'
-                        : 'warning.main'
+                        : tx.status.toLowerCase() === 'pending'
+                          ? 'warning.main'
+                          : 'error.main'
                     }
                   >
                     {tx.status}
@@ -224,45 +263,38 @@ const SalesTransactionPage = () => {
                 </Grid>
 
                 <Grid item xs={12} sm={4} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    Total Amount
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    Rs. {tx.totalAmount.toFixed(2)}
-                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>Total Amount</Typography>
+                  <Typography variant="body2" fontWeight={600}>Rs. {tx.totalAmount.toFixed(2)}</Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={4} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    Discount
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600} color="error.main">
-                    Rs. {tx.discount.toFixed(2)}
-                  </Typography>
+                  <Typography variant="caption" fontWeight={700}>Discount</Typography>
+                  <Typography variant="body2" fontWeight={600} color="error.main">Rs. {tx.discount.toFixed(2)}</Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={4} md={4} lg={2.4}>
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    fontWeight={700}
-                    gutterBottom
+                  <Typography variant="caption" fontWeight={700}>Profit</Typography>
+                  <Typography variant="body2" fontWeight={700} color="success.main">Rs. {tx.totalProfit.toFixed(2)}</Typography>
+                </Grid>
+
+                {tx.status === 'Pending' && (
+                  <Grid item xs={12} sm={6} md={6} lg={3}>
+                    <Button variant="contained" color="success" fullWidth onClick={() => handleMarkAsCompleted(tx._id)}>
+                      Mark as Completed
+                    </Button>
+                  </Grid>
+                )}
+
+                <Grid item xs={12} sm={6} md={6} lg={3}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    fullWidth
+                    disabled={tx.status === 'Cancelled'}
+                    onClick={() => handleReverseTransaction(tx._id)}
                   >
-                    Profit
-                  </Typography>
-                  <Typography variant="body2" fontWeight={700} color="success.main">
-                    Rs. {tx.totalProfit.toFixed(2)}
-                  </Typography>
+                    {tx.status === 'Cancelled' ? 'Cancelled' : 'Reverse Transaction'}
+                  </Button>
                 </Grid>
               </Grid>
 
