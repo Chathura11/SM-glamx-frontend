@@ -74,10 +74,7 @@ const SalesTransactionPage = () => {
           Quantity: item.quantity,
           SellingPrice: item.sellingPrice,
           CostPrice: item.costPrice,
-          Profit: (item.sellingPrice - item.costPrice) * item.quantity,
-          Discount: tx.discount,
-          TotalAmount: tx.totalAmount,
-          TotalProfit: tx.totalProfit,
+          Profit: (item.sellingPrice - item.costPrice) * item.quantity
         });
       });
     });
