@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../api/api';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import {
   Paper,
   Grid,
@@ -11,6 +13,7 @@ import {
   Divider,
   LinearProgress,
   TextField,
+  Button,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -53,6 +56,49 @@ const SalesTransactionPage = () => {
     filterByDate(transactions, date);
   };
 
+  const exportToExcel = () => {
+    const excelData = [];
+  
+    transactions.forEach(tx => {
+      tx.items.forEach(item => {
+        excelData.push({
+          Date: new Date(tx.createdAt).toLocaleString(),
+          Customer: tx.customerName || 'Walk-in',
+          SoldBy: tx.user?.name || 'Unknown',
+          Status: tx.status,
+          PaymentMethod: tx.paymentMethod,
+          Product: item.product?.name,
+          Category: item.product?.category?.name,
+          Brand: item.product?.brand?.name,
+          Size: item.size,
+          Quantity: item.quantity,
+          SellingPrice: item.sellingPrice,
+          CostPrice: item.costPrice,
+          Profit: (item.sellingPrice - item.costPrice) * item.quantity,
+          Discount: tx.discount,
+          TotalAmount: tx.totalAmount,
+          TotalProfit: tx.totalProfit,
+        });
+      });
+    });
+  
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+  
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const blob = new Blob([excelBuffer], {
+      type:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    });
+  
+    saveAs(blob, `sales_transactions_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`);
+  };
+
   const formatDate = (dateStr) => new Date(dateStr).toLocaleString();
 
   return (
@@ -67,18 +113,31 @@ const SalesTransactionPage = () => {
       >
         Sales Transactions
       </Typography>
+      <Grid container direction="row" justifySelf='end' spacing={4}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="Select Date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            renderInput={(params) => (
+              <TextField {...params} fullWidth sx={{ mb: 3, maxWidth: 300 }} />
+            )}
+          />
+        </LocalizationProvider>
 
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker
-          label="Select Date"
-          value={selectedDate}
-          onChange={handleDateChange}
-          renderInput={(params) => (
-            <TextField {...params} fullWidth sx={{ mb: 3, maxWidth: 300 }} />
-          )}
-        />
-      </LocalizationProvider>
-
+        <Box sx={{justifyItems:'end'}}>
+          <Button onClick={exportToExcel} style={{
+                backgroundColor: '#1976d2',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}>
+                Download All Transactions
+          </Button>
+        </Box>
+      </Grid>      
       {loading ? (
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <LinearProgress color="primary" />
