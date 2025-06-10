@@ -3,6 +3,7 @@ import { Box, Container, Stack } from '@mui/system'
 import '../../css/app.css'
 import logo from '../../assets/ccNew.png'
 import SignIn from './SignIn'
+import companylogo from '../../assets/glamx.png'
 
 
 export default function Landing(){
@@ -53,8 +54,9 @@ function Content(){
                         <Grid container style={{ marginTop: '72px' }}>
                             <Grid sx={{ mt: '32px' }}>
                                 <Box>
-                                    <Typography sx={{color:'white',fontSize:'50px'}}>SalesMaestro</Typography>
-                                    <Typography sx={{color:'white',marginBottom:0,marginTop:0,fontSize:'25px'}}>Point of sales system</Typography>
+                                    {/* <Typography sx={{color:'white',fontSize:'50px'}}>SalesMaestro</Typography> */}
+                                    <img src={companylogo} style={{ width: "400px",marginLeft:-40}}/>
+                                    <Typography sx={{color:'white',marginBottom:0,marginTop:0,fontSize:'25px'}}>SalesMaestro Point of sales system</Typography>
                                     <Typography sx={{color:'white',marginBottom:4,fontSize:'15px'}}>Make your sales properly</Typography>
                                     <Stack direction='row' spacing={2} sx={{alignItems:'center'}}>
                                         
