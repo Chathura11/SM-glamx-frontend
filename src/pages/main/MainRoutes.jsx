@@ -44,7 +44,7 @@ const DashboardRoutes = () => {
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
-        // minWidth:'1220px'
+        minWidth:'700px'
     }
 
     const {authUser,
