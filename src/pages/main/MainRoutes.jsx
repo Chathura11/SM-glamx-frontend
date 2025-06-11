@@ -43,7 +43,8 @@ const DashboardRoutes = () => {
         minHeight:'100vh',
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover',
-        backgroundAttachment: 'fixed'
+        backgroundAttachment: 'fixed',
+        minWidth:'700px'
     }
 
     const {authUser,
