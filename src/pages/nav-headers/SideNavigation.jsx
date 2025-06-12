@@ -14,7 +14,7 @@ import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined';
 import logo from '../../assets/ccNew.png'
 import PersonIcon from '@mui/icons-material/Person';
 import ProfileCard from '../user-profile/ProfileCard';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
@@ -116,7 +116,7 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
         navigate('/sell')
       }
       if(index===1){
-        navigate('/home')
+        navigate('/dashboard')
       }
       if(index ===2){
         navigate('/categories')
@@ -244,7 +244,7 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
                 </DrawerHeader>
                 <Divider />
                   <List>
-                    {['Sell', 'Home', 'Categories', 'Brands', 'Inventory','Sale Transactions'].map((text, index) => (
+                    {['Sell', 'Dashboard', 'Categories', 'Brands', 'Inventory','Sale Transactions'].map((text, index) => (
                       <ListItem key={text} disablePadding sx={{ display: 'block' }}>
                         <ListItemButton
                           sx={{
@@ -262,7 +262,7 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
                             }}
                           >
                             {index === 0 ? <AddShoppingCartIcon /> 
-                            : index === 1 ? <HomeOutlinedIcon /> 
+                            : index === 1 ? <DashboardOutlinedIcon /> 
                             : index === 2 ? <TableViewOutlinedIcon /> 
                             : index === 3 ? <StyleOutlinedIcon />
                             : index === 4 ?<Inventory2OutlinedIcon />

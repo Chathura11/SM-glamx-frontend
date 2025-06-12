@@ -81,7 +81,7 @@ function Content(){
 function Footer() {
     return (
         <Stack sx={{ backgroundColor: 'black', color: 'white', textAlign: 'center',padding:2,alignContent:'center',alignItems:'center',p: '10px 32px 32px 10px'}}>
-            <Typography variant='p'>Copyright © chathuracreations 2023. All right reserved</Typography>
+            <Typography variant='p'>Copyright © chathuracreations 2025. All right reserved</Typography>
 
             <img src={logo} alt="logo" style={{ width: "30px" }} />
         </Stack>
