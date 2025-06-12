@@ -104,11 +104,13 @@ const SalesTransactionPage = () => {
   const exportToExcel = () => {
     const exportData = showAll ? transactions : filtered;
   
-    const excelData = [];
+    const detailedSheet = [];
+    const summarySheet = [];
   
     exportData.forEach(tx => {
+      // For the detailed sheet (each item)
       tx.items.forEach(item => {
-        excelData.push({
+        detailedSheet.push({
           Date: new Date(tx.createdAt).toLocaleString(),
           Customer: tx.customerName || 'Walk-in',
           SoldBy: tx.user?.name || 'Unknown',
@@ -124,11 +126,27 @@ const SalesTransactionPage = () => {
           Profit: (item.sellingPrice - item.costPrice) * item.quantity,
         });
       });
+  
+      // For the summary sheet (transaction-level)
+      summarySheet.push({
+        Date: new Date(tx.createdAt).toLocaleString(),
+        Customer: tx.customerName || 'Walk-in',
+        SoldBy: tx.user?.name || 'Unknown',
+        Status: tx.status,
+        PaymentMethod: tx.paymentMethod,
+        TotalPrice: tx.totalAmount,
+        Discount: tx.discount,
+        TotalProfit: tx.totalProfit,
+      });
     });
   
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+  
+    const detailedWS = XLSX.utils.json_to_sheet(detailedSheet);
+    XLSX.utils.book_append_sheet(workbook, detailedWS, 'Item Details');
+  
+    const summaryWS = XLSX.utils.json_to_sheet(summarySheet);
+    XLSX.utils.book_append_sheet(workbook, summaryWS, 'Transaction Summary');
   
     const filename = showAll
       ? `sales_transactions_all_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`
@@ -145,6 +163,7 @@ const SalesTransactionPage = () => {
   
     saveAs(blob, filename);
   };
+  
   
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleString();
