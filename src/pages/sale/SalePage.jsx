@@ -246,9 +246,10 @@ const SalesPage = ({ authUser }) => {
               <TableCell>Product</TableCell>
               <TableCell>Size</TableCell>
               <TableCell>Qty</TableCell>
-              <TableCell>Selling Price</TableCell>
-              <TableCell>Cost Price</TableCell>
-              <TableCell>Profit</TableCell>
+              <TableCell>Unit Price</TableCell>
+              <TableCell>Total Price</TableCell>
+              {/* <TableCell>Cost Price</TableCell>
+              <TableCell>Profit</TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -257,9 +258,10 @@ const SalesPage = ({ authUser }) => {
                 <TableCell>{item.product.name}</TableCell>
                 <TableCell>{item.size}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
-                <TableCell>{item.sellingPrice}</TableCell>
-                <TableCell>{item.costPrice}</TableCell>
-                <TableCell>{item.profit.toFixed(2)}</TableCell>
+                <TableCell>{item.sellingPrice.toFixed(2)}</TableCell>
+                <TableCell>{(item.sellingPrice * item.quantity).toFixed(2)}</TableCell>
+                {/* <TableCell>{item.costPrice}</TableCell>
+                <TableCell>{item.profit.toFixed(2)}</TableCell> */}
               </TableRow>
             ))}
           </TableBody>
