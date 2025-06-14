@@ -4,6 +4,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@mui/material';
 import axiosInstance from '../../api/api';
+import { useNavigate } from 'react-router-dom';
 
 const SalesPage = ({ authUser }) => {
   const [products, setProducts] = useState([]);
@@ -18,6 +19,8 @@ const SalesPage = ({ authUser }) => {
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [status, setStatus] = useState('Completed');
   const [isLoading,setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -104,7 +107,7 @@ const SalesPage = ({ authUser }) => {
     }));
 
     try {
-      await axiosInstance.post('/sales', {
+      const res = await axiosInstance.post('/sales', {
         userId,
         customerName,
         paymentMethod,
@@ -117,6 +120,7 @@ const SalesPage = ({ authUser }) => {
       fetchData();
       handleClear();
       setIsLoading(false);
+      navigate(`/sell/invoice/${res.data.transaction._id}`);
     } catch (err) {
       console.error(err);
       alert("Failed to complete sale.");

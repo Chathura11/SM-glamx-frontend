@@ -6,6 +6,7 @@ import { Route, Routes } from 'react-router-dom';
 import SaleContent from './SaleContent';
 import SalesPage from './SalePage';
 import SalesTransactionPage from './SalesTransactionPage';
+import InvoicePage from './InvoicePage';
 
 const SaleIndex = ({isLoggedIn,authUser}) => {
 
@@ -21,6 +22,7 @@ const SaleIndex = ({isLoggedIn,authUser}) => {
                     {/* <Route path='/' element={<SaleContent authUser={authUser}/>}></Route> */}
                     <Route path='/' element={<SalesPage authUser={authUser}/>}></Route>
                     <Route path='/sale-transactions' element={<SalesTransactionPage authUser={authUser}/>}></Route>
+                    <Route path='/invoice/:id' element={<InvoicePage authUser={authUser}/>}></Route>
                 </Routes>
             }
     </Stack>

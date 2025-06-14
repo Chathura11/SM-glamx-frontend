@@ -21,6 +21,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 const SalesTransactionPage = () => {
   const [transactions, setTransactions] = useState([]);
@@ -29,6 +30,8 @@ const SalesTransactionPage = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [showPendingOnly, setShowPendingOnly] = useState(false);
   const [showAll, setShowAll] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadTransactions();
@@ -163,6 +166,10 @@ const SalesTransactionPage = () => {
   
     saveAs(blob, filename);
   };
+
+  function handlePrintInvoice(id){
+    navigate(`/sell/invoice/${id}`);
+  }
   
   
 
@@ -334,6 +341,9 @@ const SalesTransactionPage = () => {
                   ))}
                 </List>
               </Box>
+              <Button variant="contained" color="primary" onClick={()=>handlePrintInvoice(tx._id)} sx={{ mt: 3 }}>
+                Print Invoice
+              </Button>
             </Grid>
           ))}
         </Grid>
