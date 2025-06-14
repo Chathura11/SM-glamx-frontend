@@ -7,32 +7,32 @@ import logo from '../../assets/logo1.png'
 import logoName from '../../assets/glamx.png'
 
 const InvoicePage = () => {
-  const { id } = useParams();
-  const [transaction, setTransaction] = useState(null);
-  const [items, setItems] = useState([]);
-  const componentRef = useRef();
+    const { id } = useParams();
+    const [transaction, setTransaction] = useState(null);
+    const [items, setItems] = useState([]);
+    const componentRef = useRef();
 
-  useEffect(() => {
-    axiosInstance.get(`/sales/${id}`)
-      .then(res => {
-        setTransaction(res.data.transaction);
-        setItems(res.data.items);
-      })
-      .catch(err => {
-        console.error("Failed to fetch invoice:", err);
-      });
-  }, [id]);
+    useEffect(() => {
+        axiosInstance.get(`/sales/${id}`)
+        .then(res => {
+            setTransaction(res.data.transaction);
+            setItems(res.data.items);
+        })
+        .catch(err => {
+            console.error("Failed to fetch invoice:", err);
+        });
+    }, [id]);
 
-  const handlePrint = useReactToPrint({
-    documentTitle: `Invoice_${id}`,
-    contentRef: componentRef,
-  });
+    const handlePrint = useReactToPrint({
+        documentTitle: `Invoice_${id}`,
+        contentRef: componentRef,
+    });
 
-  if (!transaction) return <Typography>Loading invoice...</Typography>;
+    if (!transaction) return <Typography>Loading invoice...</Typography>;
 
-  const total = items.reduce((sum, item) =>
-    sum + item.quantity * item.sellingPrice, 0);
-  const netTotal = total - transaction.discount;
+    const total = items.reduce((sum, item) =>
+        sum + item.quantity * item.sellingPrice, 0);
+    const netTotal = total - transaction.discount;
 
   return (
     <Paper sx={{ p: 4 }}>
