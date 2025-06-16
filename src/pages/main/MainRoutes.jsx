@@ -14,6 +14,7 @@ import SaleIndex from '../sale/SaleIndex'
 import InventoryIndex from '../inventory/InventoryIndex'
 import SalesPage from '../sale/SalePage'
 import DashboardIndex from '../dashboard/DashboardIndex'
+import AccountIndex from '../account/AccountIndex'
 
 
 const drawerWidth = 500
@@ -78,6 +79,7 @@ const DashboardRoutes = () => {
                                 <Route path='/sell/*' element={<SaleIndex isLoggedIn={isLoggedIn} authUser={authUser}/>} />
                                 <Route path='/dashboard/*' element={<DashboardIndex isLoggedIn={isLoggedIn} authUser={authUser}/>} />
                                 <Route path='/inventories/*' element={<InventoryIndex isLoggedIn={isLoggedIn} authUser={authUser}/>} />
+                                <Route path='/accounts/*' element={<AccountIndex isLoggedIn={isLoggedIn} authUser={authUser}/>} />
                                 {/* <Route path='/sale-test/*' element={<SalesPage isLoggedIn={isLoggedIn} authUser={authUser}/>} /> */}
                                 {/* <Route path='/barcode/*' element={<BarcodeReader/>} /> */}
                                 {/* <Route path='/contact/*' element={<ContactIndex/>} /> */}
