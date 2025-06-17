@@ -11,12 +11,13 @@ import {
   CircularProgress,
   Box,
   Button,
+  Grid,
 } from '@mui/material';
 import axios from '../../api/api'; // Adjust based on your structure
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { red, teal } from '@mui/material/colors';
+import { blueGrey, red, teal } from '@mui/material/colors';
 
 const AccountPage = () => {
   const [accounts, setAccounts] = useState([]);
@@ -85,9 +86,36 @@ const AccountPage = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <Paper variant='outlined'>
+        <Paper variant='outlined' sx={{p:2}}>
+          {/* Summary Cards */}
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid size={6}>
+              <Paper variant='outlined' sx={{ p: 3, borderLeft: `6px solid ${teal[500]}` }}>
+                <Typography variant="h6" color="textSecondary">Available Cash</Typography>
+                <Typography variant="h4" fontWeight={700}>
+                  LKR {accounts.find(a => a.name === 'Cash')?.balance.toFixed(2) || '0.00'}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={6}>
+              <Paper variant='outlined' sx={{ p: 3, borderLeft: `6px solid ${red[700]}` }}>
+                <Typography variant="h6" color="textSecondary">Available Profit</Typography>
+                <Typography variant="h4" fontWeight={700}>
+                  LKR {
+                    (() => {
+                      const sales = accounts.find(a => a.name === 'Sales Revenue')?.balance || 0;
+                      const cogs = accounts.find(a => a.name === 'COGS')?.balance || 0;
+                      const addionalExp = accounts.find(a => a.name === 'Additional Expense')?.balance || 0;
+                      const salaryExp = accounts.find(a => a.name === 'Salary Expense')?.balance || 0;
+                      return (sales - (cogs+addionalExp+salaryExp)).toFixed(2);
+                    })()
+                  }
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
           <Table>
-            <TableHead>
+            <TableHead sx={{backgroundColor:blueGrey[100]}}>
               <TableRow>
                 <TableCell><strong>Name</strong></TableCell>
                 <TableCell><strong>Type</strong></TableCell>
