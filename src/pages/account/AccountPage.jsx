@@ -14,6 +14,9 @@ import {
 } from '@mui/material';
 import axios from '../../api/api'; // Adjust based on your structure
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { red, teal } from '@mui/material/colors';
 
 const AccountPage = () => {
   const [accounts, setAccounts] = useState([]);
@@ -44,16 +47,35 @@ const AccountPage = () => {
     navigate('/accounts/journal')
   }
 
+  const exportToExcel = () => {
+    const formatted = accounts.map(account => ({
+      AccountName: account.name,
+      Type: account.type,
+      Balance:account.balance
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formatted);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Accounts');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const file = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(file, `Accounts_${Date.now()}.xlsx`);
+  };
+
   return (
     <Paper sx={{padding:3}}>
       <Typography variant="h4" gutterBottom fontWeight={700} textAlign="center" color="primary" mb={4}>
         Account Details
       </Typography>
       <Box sx={{textAlign:'end',mb:2}}>
-        <Button variant="contained" sx={{width:'200px',mr:2}} onClick={handleJournal}>
+        <Button variant="contained" sx={{width:'200px',mr:2}} onClick={exportToExcel}>
+            EXPORT TO EXCEL
+        </Button>
+        <Button variant="contained" sx={{width:'200px',mr:2,backgroundColor:teal[500]}} onClick={handleJournal}>
             Journal
         </Button>
-        <Button variant="contained" sx={{width:'200px'}} onClick={handleManageAccount}>
+        <Button variant="contained" sx={{width:'200px',backgroundColor:red[700]}} onClick={handleManageAccount}>
             Manage Accounts
         </Button>
       </Box>
