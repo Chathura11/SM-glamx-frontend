@@ -21,6 +21,7 @@ const AccountHandlePage = () => {
     description: ''
   });
   const navigate = useNavigate();
+  const[loading,setLoading] = useState(false);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -40,19 +41,39 @@ const AccountHandlePage = () => {
 
   const handleMoneyAssetSubmit = async () => {
     try {
+      setLoading(true);
       await axiosInstance.post('/accounts/add-asset', moneyAssetData);
       alert('Money asset added successfully!');
+      setMoneyAssetData({
+        amount: '',
+        category: '',
+        paidFrom: '',
+        description: ''
+      })
     } catch (err) {
       alert('Error: ' + err.response?.data?.message || err.message);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
   const handleExpenseSubmit = async () => {
     try {
+      setLoading(true);
       await axiosInstance.post('/accounts/add-expense', expenseData);
       alert('Expense recorded successfully!');
+      setExpenseData({
+        amount: '',
+        category: '',
+        paidFrom: '',
+        description: ''
+      })
     } catch (err) {
       alert('Error: ' + err.response?.data?.message || err.message);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -121,7 +142,7 @@ const AccountHandlePage = () => {
               sx={{ mb: 2 }}
             />
             <Box sx={{textAlign:'end'}}>
-                <Button variant="contained" sx={{width:'200px'}} onClick={handleMoneyAssetSubmit}>
+                <Button variant="contained" sx={{width:'200px'}} onClick={handleMoneyAssetSubmit} disabled={loading}>
                     Submit Money Asset
                 </Button>
             </Box>
@@ -179,7 +200,7 @@ const AccountHandlePage = () => {
               sx={{ mb: 2 }}
             />
             <Box sx={{textAlign:'end'}}>
-                <Button variant="contained" sx={{width:'200px'}} onClick={handleExpenseSubmit}>
+                <Button variant="contained" sx={{width:'200px'}} onClick={handleExpenseSubmit} disabled={loading}>
                     Submit Expense
                 </Button>
             </Box>
