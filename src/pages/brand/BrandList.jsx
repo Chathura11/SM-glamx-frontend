@@ -13,6 +13,7 @@ import { green, orange } from '@mui/material/colors';
 const BrandList = ({configure}) => {
     const {openSidePanel} = useSidePanel()
     const [isLoading, setIsLoading] = useState(true); 
+    const [products,setProducts] = useState([]);
     const handleClickBrandFormOpen = () => {
         openSidePanel("ADD NEW BRAND",<BrandForm/>)
     };
@@ -30,6 +31,12 @@ const BrandList = ({configure}) => {
           setBrands(res.data.data)
         }).catch((error)=>{
           console.log(error.response.data.message)
+        })
+
+        await axiosInstance.get('/products').then((res)=>{
+          setProducts(res.data.data);
+        }).catch((error)=>{
+          console.log(error.response.data.message);
         })
 
         setIsLoading(false)
@@ -89,7 +96,7 @@ const BrandList = ({configure}) => {
                         </Box>        
                       <CardContent>
                         <Typography variant="body2" color="text.secondary" sx={{textAlign:'center'}}>
-                          product count
+                          product count : {products.filter(product => product.brand?._id === brand._id).length}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -119,7 +126,7 @@ const BrandList = ({configure}) => {
                       <CardContent>
                         <Chip size='small' sx={{color:'white',background: brand.status === true ? green[400] : orange[400],width:'100%'}} label={brand.status === true ? 'Active' : 'Inactive'} />
                         <Typography variant="body2" color="text.secondary" sx={{textAlign:'center'}}>
-                          product count
+                          product count : {products.filter(product => product.brand?._id === brand._id).length}
                         </Typography>
                       </CardContent>
                     </Card>

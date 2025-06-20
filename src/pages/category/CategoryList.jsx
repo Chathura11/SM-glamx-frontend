@@ -13,6 +13,7 @@ import { green, orange } from '@mui/material/colors';
 const CategoryList = ({configure}) => {
   const {openSidePanel} = useSidePanel()
   const [isLoading, setIsLoading] = useState(true); 
+  const [products,setProducts] = useState([]);
   const navigate = useNavigate()
 
   const handleClickCategoryFormOpen = () => {
@@ -29,6 +30,12 @@ const CategoryList = ({configure}) => {
     async function load(){
       await axiosInstance.get('categories').then((res)=>{
         SetCategories(res.data.data)
+      }).catch((error)=>{
+        console.log(error.response.data.message)
+      })
+
+      await axiosInstance.get('/products').then((res)=>{
+        setProducts(res.data.data);
       }).catch((error)=>{
         console.log(error.response.data.message)
       })
@@ -90,7 +97,7 @@ return (
                       </Box>        
                     <CardContent>
                       <Typography variant="body2" color="text.secondary" sx={{textAlign:'center'}}>
-                        product count
+                        product count : {products.filter(product => product.category?._id === category._id).length}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -120,7 +127,7 @@ return (
                     <CardContent>
                     <Chip  variant='filled' size='small' sx={{color:'white',background: category.status === true ? green[400] : orange[400],width:'100%'}} label={category.status === true ? 'Active' : 'Inactive'} />
                       <Typography variant="body2" color="text.secondary" sx={{textAlign:'center'}}>
-                        product count
+                        product count : {products.filter(product => product.category?._id === category._id).length}
                       </Typography>
                     </CardContent>
                   </Card>
