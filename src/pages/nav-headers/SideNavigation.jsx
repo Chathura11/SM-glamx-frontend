@@ -19,6 +19,8 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
+import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined';
+import AssignmentReturnOutlinedIcon from '@mui/icons-material/AssignmentReturnOutlined';
 
 const drawerWidth = 240;
 
@@ -132,8 +134,15 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
         navigate('/sell/sale-transactions')
       }
       if(index ===6){
+        navigate('/sales-return')
+      }
+      if(index ===7){
+        navigate('/sales-return/all')
+      }
+      if(index ===8){
         navigate('/accounts')
       }
+      
     }
 
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -248,7 +257,7 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
                 </DrawerHeader>
                 <Divider />
                   <List>
-                    {['Sell', 'Dashboard', 'Categories', 'Brands', 'Inventory','Sale Transactions','Accounts'].map((text, index) => (
+                    {['Sell', 'Dashboard', 'Categories', 'Brands', 'Inventory','Sale Transactions','Sales Return','View Sales Returns','Accounts'].map((text, index) => (
                       <ListItem key={text} disablePadding sx={{ display: 'block' }}>
                         <ListItemButton
                           sx={{
@@ -271,6 +280,8 @@ const SideNavigation = ({isLoggedIn,authUser,logOut}) => {
                             : index === 3 ? <StyleOutlinedIcon />
                             : index === 4 ?<Inventory2OutlinedIcon />
                             : index === 5 ?<PointOfSaleIcon />
+                            : index === 6 ?<CompareArrowsOutlinedIcon />
+                            : index === 7 ?<AssignmentReturnOutlinedIcon />
                             :<AccountBalanceOutlinedIcon/>
                           }
                           </ListItemIcon>
